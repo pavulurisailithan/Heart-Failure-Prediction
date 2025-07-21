@@ -1,0 +1,67 @@
+from flask import Flask, render_template, request
+import pickle
+import numpy as np
+import pandas as pd
+
+app = Flask(__name__)
+
+# Load the trained model and scaler
+try:
+    with open('heart_failure_model.pkl', 'rb') as model_file:
+        model = pickle.load(model_file)
+    with open('scaler.pkl', 'rb') as scaler_file:
+        scaler = pickle.load(scaler_file)
+except FileNotFoundError:
+    print("Error: Model or scaler file not found. Please ensure 'heart_failure_model.pkl' and 'scaler.pkl' are in the same directory.")
+    model = None
+    scaler = None
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    if model is None or scaler is None:
+        return render_template('index.html', prediction_text="Error: Model not loaded. Please check server logs.")
+
+    try:
+        # Get form data
+        age = float(request.form['age'])
+        anaemia = int(request.form['anaemia'])
+        creatinine_phosphokinase = float(request.form['creatinine_phosphokinase'])
+        diabetes = int(request.form['diabetes'])
+        ejection_fraction = float(request.form['ejection_fraction'])
+        high_blood_pressure = int(request.form['high_blood_pressure'])
+        platelets = float(request.form['platelets'])
+        serum_creatinine = float(request.form['serum_creatinine'])
+        serum_sodium = float(request.form['serum_sodium'])
+        sex = int(request.form['sex'])
+        smoking = int(request.form['smoking'])
+        time = float(request.form['time'])
+
+        # Create a DataFrame from the input data
+        input_data = pd.DataFrame([[age, anaemia, creatinine_phosphokinase, diabetes,
+                                      ejection_fraction, high_blood_pressure, platelets,
+                                      serum_creatinine, serum_sodium, sex, smoking, time]],
+                                    columns=['age', 'anaemia', 'creatinine_phosphokinase', 'diabetes',
+                                             'ejection_fraction', 'high_blood_pressure', 'platelets',
+                                             'serum_creatinine', 'serum_sodium', 'sex', 'smoking', 'time'])
+
+        # Scale the input data using the loaded scaler
+        input_scaled = scaler.transform(input_data)
+
+        # Make prediction
+        prediction = model.predict(input_scaled)[0]
+        prediction_proba = model.predict_proba(input_scaled)[0]
+
+        output = "Death Event Likely" if prediction == 1 else "No Death Event Likely"
+        probability = f"Probability of Death Event: {prediction_proba[1]*100:.2f}%"
+
+        return render_template('index.html', prediction_text=output, probability_text=probability)
+
+    except Exception as e:
+        return render_template('index.html', prediction_text=f"Error processing input: {e}")
+
+if __name__ == '__main__':
+    app.run(debug=True)
