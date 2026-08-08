@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Failure Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 16px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+            width: 100%;
+            max-width: 720px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #e63946, #c1121f);
+            padding: 32px 40px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .card-header .icon { font-size: 2.8rem; margin-bottom: 8px; }
+        .card-header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+        .card-header p { font-size: 0.9rem; opacity: 0.85; margin-top: 6px; }
+
+        .lang-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px 40px 0;
+        }
+
+        .lang-toggle button {
+            padding: 6px 20px;
+            border: 2px solid #e63946;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            background: white;
+            color: #e63946;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button.active {
+            background: #e63946;
+            color: white;
+        }
+
+        .card-body { padding: 28px 40px 36px; }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin: 20px 0 12px;
+        }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+        label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #444;
+        }
+
+        input[type="number"], select {
+            padding: 10px 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            color: #333;
+            transition: border-color 0.2s;
+            background: #fafafa;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #e63946;
+            background: #fff;
+        }
+
+        .hint {
+            font-size: 0.72rem;
+            color: #aaa;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 28px;
+            padding: 14px;
+            background: linear-gradient(135deg, #e63946, #c1121f);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .submit-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+        .submit-btn:active { transform: translateY(0); }
+
+        .result {
+            margin-top: 24px;
+            border-radius: 12px;
+            padding: 20px 24px;
+            text-align: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .result.danger {
+            background: #fff0f1;
+            border: 1.5px solid #f5c2c7;
+        }
+
+        .result.safe {
+            background: #f0fff4;
+            border: 1.5px solid #b7ebc8;
+        }
+
+        .result .result-icon { font-size: 2rem; margin-bottom: 6px; }
+
+        .result .result-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .result.danger .result-title { color: #c1121f; }
+        .result.safe .result-title { color: #1a7f3c; }
+
+        .result .result-prob {
+            font-size: 0.88rem;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .result.error {
+            background: #fff8e1;
+            border: 1.5px solid #ffe082;
+        }
+
+        .result.error .result-title { color: #b45309; }
+
+        .divider {
+            height: 1px;
+            background: #f0f0f0;
+            margin: 20px 0 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 520px) {
+            .grid { grid-template-columns: 1fr; }
+            .card-body { padding: 20px 20px 28px; }
+            .card-header { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <div class="icon">❤️</div>
+        <h1 id="title">Heart Failure Prediction</h1>
+        <p id="subtitle">Enter patient clinical data to assess risk</p>
+    </div>
+
+    <div class="lang-toggle">
+        <button class="active" onclick="setLang('en')">English</button>
+        <button onclick="setLang('te')">తెలుగు</button>
+    </div>
+
+    <div class="card-body">
+        <form action="/predict" method="post">
+
+            <div class="section-title" id="sec_personal">Patient Information</div>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="age" id="l_age">Age</label>
+                    <input type="number" id="age" name="age" placeholder="e.g. 60" required step="any" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="sex" id="l_sex">Sex</label>
+                    <select id="sex" name="sex" required>
+                        <option value="0" id="female">Female</option>
+                        <option value="1" id="male">Male</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title" id="sec_clinical">Clinical Indicators</div>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="ejection_fraction" id="l_ef">Ejection Fraction (%)</label>
+                    <input type="number" id="ejection_fraction" name="ejection_fraction" placeholder="e.g. 38" required step="any">
+                    <span class="hint" id="h_ef">Normal: 55–70%</span>
+                </div>
+                <div class="form-group">
+                    <label for="serum_creatinine" id="l_sc">Serum Creatinine (mg/dL)</label>
+                    <input type="number" id="serum_creatinine" name="serum_creatinine" placeholder="e.g. 1.1" required step="any">
+                    <span class="hint" id="h_sc">Normal: 0.6–1.2</span>
+                </div>
+                <div class="form-group">
+                    <label for="serum_sodium" id="l_ss">Serum Sodium (mEq/L)</label>
+                    <input type="number" id="serum_sodium" name="serum_sodium" placeholder="e.g. 137" required step="any">
+                    <span class="hint" id="h_ss">Normal: 135–145</span>
+                </div>
+                <div class="form-group">
+                    <label for="creatinine_phosphokinase" id="l_cpk">CPK Level (mcg/L)</label>
+                    <input type="number" id="creatinine_phosphokinase" name="creatinine_phosphokinase" placeholder="e.g. 250" required step="any">
+                </div>
+                <div class="form-group">
+                    <label for="platelets" id="l_platelets">Platelets (kiloplatelets/mL)</label>
+                    <input type="number" id="platelets" name="platelets" placeholder="e.g. 263000" required step="any">
+                </div>
+                <div class="form-group">
+                    <label for="time" id="l_time">Follow-up Period (days)</label>
+                    <input type="number" id="time" name="time" placeholder="e.g. 130" required step="any">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title" id="sec_conditions">Medical Conditions</div>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="anaemia" id="l_anaemia">Anaemia</label>
+                    <select id="anaemia" name="anaemia" required>
+                        <option value="0" id="no1">No</option>
+                        <option value="1" id="yes1">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="diabetes" id="l_diabetes">Diabetes</label>
+                    <select id="diabetes" name="diabetes" required>
+                        <option value="0" id="no2">No</option>
+                        <option value="1" id="yes2">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="high_blood_pressure" id="l_hbp">High Blood Pressure</label>
+                    <select id="high_blood_pressure" name="high_blood_pressure" required>
+                        <option value="0" id="no3">No</option>
+                        <option value="1" id="yes3">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="smoking" id="l_smoking">Smoking</label>
+                    <select id="smoking" name="smoking" required>
+                        <option value="0" id="no4">No</option>
+                        <option value="1" id="yes4">Yes</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit_btn">🔍 Predict Risk</button>
+        </form>
+
+        {% if prediction_text %}
+        <div class="result {% if 'Death Event Likely' in prediction_text %}danger{% elif 'Error' in prediction_text %}error{% else %}safe{% endif %}">
+            <div class="result-icon">
+                {% if 'Death Event Likely' in prediction_text %}⚠️{% elif 'Error' in prediction_text %}⚡{% else %}✅{% endif %}
+            </div>
+            <div class="result-title">{{ prediction_text }}</div>
+            {% if probability_text %}
+            <div class="result-prob">{{ probability_text }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+const translations = {
+    en: {
+        title: "Heart Failure Prediction",
+        subtitle: "Enter patient clinical data to assess risk",
+        sec_personal: "Patient Information",
+        sec_clinical: "Clinical Indicators",
+        sec_conditions: "Medical Conditions",
+        l_age: "Age", l_sex: "Sex", l_ef: "Ejection Fraction (%)",
+        l_sc: "Serum Creatinine (mg/dL)", l_ss: "Serum Sodium (mEq/L)",
+        l_cpk: "CPK Level (mcg/L)", l_platelets: "Platelets (kiloplatelets/mL)",
+        l_time: "Follow-up Period (days)", l_anaemia: "Anaemia",
+        l_diabetes: "Diabetes", l_hbp: "High Blood Pressure", l_smoking: "Smoking",
+        submit_btn: "🔍 Predict Risk",
+        h_ef: "Normal: 55–70%", h_sc: "Normal: 0.6–1.2", h_ss: "Normal: 135–145",
+        no1:"No", yes1:"Yes", no2:"No", yes2:"Yes", no3:"No", yes3:"Yes", no4:"No", yes4:"Yes",
+        female:"Female", male:"Male"
+    },
+    te: {
+        title: "గుండె వైఫల్యం అంచనా",
+        subtitle: "రోగి క్లినికల్ డేటా నమోదు చేయండి",
+        sec_personal: "రోగి సమాచారం",
+        sec_clinical: "క్లినికల్ సూచికలు",
+        sec_conditions: "వైద్య పరిస్థితులు",
+        l_age: "వయసు", l_sex: "లింగం", l_ef: "ఎజెక్షన్ ఫ్రాక్షన్ (%)",
+        l_sc: "సీరమ్ క్రియాటినిన్ (mg/dL)", l_ss: "సీరమ్ సోడియం (mEq/L)",
+        l_cpk: "CPK స్థాయి (mcg/L)", l_platelets: "ప్లేట్లెట్స్",
+        l_time: "ఫాలో-అప్ వ్యవధి (రోజులు)", l_anaemia: "రక్తహీనత",
+        l_diabetes: "మధుమేహం", l_hbp: "అధిక రక్తపోటు", l_smoking: "ధూమపానం",
+        submit_btn: "🔍 అంచనా వేయండి",
+        h_ef: "సాధారణం: 55–70%", h_sc: "సాధారణం: 0.6–1.2", h_ss: "సాధారణం: 135–145",
+        no1:"కాదు", yes1:"అవును", no2:"కాదు", yes2:"అవును",
+        no3:"కాదు", yes3:"అవును", no4:"కాదు", yes4:"అవును",
+        female:"స్త్రీ", male:"పురుషుడు"
+    }
+};
+
+function setLang(lang) {
+    const t = translations[lang];
+    for (const [id, text] of Object.entries(t)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        if (el.tagName === 'BUTTON' || el.tagName === 'SPAN' || el.tagName === 'DIV' || el.tagName === 'P') {
+            el.textContent = text;
+        } else if (el.tagName === 'OPTION') {
+            el.textContent = text;
+        } else if (el.tagName === 'LABEL') {
+            el.textContent = text;
+        }
+    }
+    document.querySelectorAll('.lang-toggle button').forEach((btn, i) => {
+        btn.classList.toggle('active', (i === 0 && lang === 'en') || (i === 1 && lang === 'te'));
+    });
+}
+</script>
+</body>
+</html>
