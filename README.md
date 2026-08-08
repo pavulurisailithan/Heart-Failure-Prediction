@@ -5,6 +5,9 @@ A machine learning web app that predicts the risk of a heart failure death event
 ## 🚀 Live Demo
 > Deployed on Render — link available after deployment
 
+## Live Link
+https://heart-failure-prediction-6gxf.onrender.com/predict
+
 ## 🛠️ Tech Stack
 - Python, Flask, Scikit-learn, Pandas
 - Random Forest Classifier
